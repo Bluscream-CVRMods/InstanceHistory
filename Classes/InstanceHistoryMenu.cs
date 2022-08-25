@@ -15,7 +15,10 @@ namespace InstanceHistory {
             Menu = Parent.AddSubMenu("Instance History", "Instance History");
             return this;
         }
-        public GameObject Add(string worldId, string instanceId) => Add(worldId, instanceId, DateTime.Now);
+        public GameObject Add(string worldId, string instanceId) {
+            return Add(worldId, instanceId, DateTime.Now);
+        }
+
         public GameObject Add(string worldId, string instanceId, DateTimeOffset timestamp) {
             return Menu.AddButton($"{timestamp.LocalDateTime}", GetInstanceToolTip(worldId, instanceId), () => {
                 ABI_RC.Core.Networking.IO.Instancing.Instances.SetJoinTarget(instanceId, worldId);

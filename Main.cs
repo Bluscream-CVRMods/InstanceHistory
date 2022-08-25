@@ -1,5 +1,5 @@
-﻿using InstanceHistory;
-using HarmonyLib;
+﻿using HarmonyLib;
+using InstanceHistory;
 using MelonLoader;
 using System;
 using System.Linq;
@@ -39,7 +39,7 @@ public class Main : MelonMod {
     public MelonPreferences_Entry<int> HistoryFileLimit, HistoryMenuLimit;
 
     public override void OnApplicationStart() {
-        var cat = MelonPreferences.CreateCategory(Guh.Name);
+        MelonPreferences_Category cat = MelonPreferences.CreateCategory(Guh.Name);
         EnableModSetting = cat.CreateEntry("EnableMod", true, "Enable History");
         HistoryFileSetting = cat.CreateEntry("HistoryFile", "UserData/InstanceHistory.json", "History File Path");
         HistoryFileLimit = cat.CreateEntry("HistoryFileLimit", 50, "Max History File Entries");
@@ -51,8 +51,8 @@ public class Main : MelonMod {
 
     private void ButtonAPI_OnInit() {
         instanceHistoryMenu = new InstanceHistoryMenu(ButtonAPI.MainPage);
-        foreach (var entry in InstanceHistory.Instances.OrderByDescending(k => k.Value.LastJoined)) {
-            instanceHistoryMenu.Add(entry.Value.WorldId.ToString(), entry.Key, entry.Value.LastJoined??DateTime.Now);
+        foreach (System.Collections.Generic.KeyValuePair<string, InstanceHistoryEntry> entry in InstanceHistory.Instances.OrderByDescending(k => k.Value.LastJoined)) {
+            _ = instanceHistoryMenu.Add(entry.Value.WorldId.ToString(), entry.Key, entry.Value.LastJoined ?? DateTime.Now);
         }
     }
 }
