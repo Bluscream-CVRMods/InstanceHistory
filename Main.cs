@@ -17,37 +17,35 @@ public static class Guh {
 public static class Patches {
     public static void Init(HarmonyLib.Harmony harmonyInstance) {
         try {
-            MelonLogger.Msg("Patching SetJoinTarget");
             _ = harmonyInstance.Patch(typeof(ABI_RC.Core.Networking.IO.Instancing.Instances).GetMethod("SetJoinTarget"), postfix: new HarmonyMethod(typeof(Patches).GetMethod("SetJoinTarget")));
         } catch (Exception ex) {
-            MelonLogger.Error(ex);
+            MelonLogger.Error("Error while patching SetJoinTarget: {0}", ex.Message);
         }
-        MelonLogger.Msg("Harmony patches applied!");
     }
 
     public static void SetJoinTarget(string instanceId, string worldId) {
         MelonLogger.Msg("SetJoinTarget: {0}:{1}", worldId, instanceId);
         if (ButtonAPI.HasInit) {
             _ = Main.instanceHistoryMenu.Add(worldId, instanceId);
-            // Main.instanceHistory.Add($"{worldId}:{instanceId}");
         }
         InstanceHistory.Add(worldId, instanceId);
     }
 }
 
 public class Main : MelonMod {
-    public bool fully_loaded = false;
     public static InstanceHistoryMenu instanceHistoryMenu;
-    // public static ObservableCollection<string> instanceHistory = new ObservableCollection<string>();
+    public MelonPreferences_Entry<bool> EnableModSetting;
+    public MelonPreferences_Entry<string> HistoryFileSetting;
+    public MelonPreferences_Entry<int> HistoryFileLimit, HistoryMenuLimit;
 
-    public override void OnPreSupportModule() {
-    }
     public override void OnApplicationStart() {
-        // MelonPreferences_Category cat = MelonPreferences.CreateCategory(Guh.Name);
-        InstanceHistory.Init("UserData/InstanceHistory.json");
+        var cat = MelonPreferences.CreateCategory(Guh.Name);
+        EnableModSetting = cat.CreateEntry("EnableMod", true, "Enable History");
+        HistoryFileSetting = cat.CreateEntry("HistoryFile", "UserData/InstanceHistory.json", "History File Path");
+        HistoryFileLimit = cat.CreateEntry("HistoryFileLimit", 50, "Max History File Entries");
+        HistoryMenuLimit = cat.CreateEntry("HistoryMenuLimit", 5, "Max History Menu Entries");
+        InstanceHistory.Init((string)HistoryFileSetting.BoxedValue);
         ButtonAPI.OnInit += ButtonAPI_OnInit;
-        // instanceHistory = new ObservableCollection<string>();
-        // instanceHistory.CollectionChanged += InstanceHistory_CollectionChanged;
         Patches.Init(HarmonyInstance);
     }
 
