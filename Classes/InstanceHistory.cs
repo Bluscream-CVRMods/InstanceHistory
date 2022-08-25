@@ -48,7 +48,7 @@ namespace InstanceHistory {
         }
 
         public static void Add(string worldId, string instanceId) {
-            if (Instances.Count > 20) {
+            if (Instances.Count > (int)Main.HistoryFileLimit.BoxedValue) {
                 _ = Instances.PopFirst();
             }
 

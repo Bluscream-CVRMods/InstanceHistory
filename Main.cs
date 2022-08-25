@@ -36,14 +36,15 @@ public class Main : MelonMod {
     public static InstanceHistoryMenu instanceHistoryMenu;
     public MelonPreferences_Entry<bool> EnableModSetting;
     public MelonPreferences_Entry<string> HistoryFileSetting;
-    public MelonPreferences_Entry<int> HistoryFileLimit, HistoryMenuLimit;
+    public MelonPreferences_Entry<int> HistoryMenuLimit;
+    public static MelonPreferences_Entry<int> HistoryFileLimit;
 
     public override void OnApplicationStart() {
         MelonPreferences_Category cat = MelonPreferences.CreateCategory(Guh.Name);
         EnableModSetting = cat.CreateEntry("EnableMod", true, "Enable History");
         HistoryFileSetting = cat.CreateEntry("HistoryFile", "UserData/InstanceHistory.json", "History File Path");
         HistoryFileLimit = cat.CreateEntry("HistoryFileLimit", 50, "Max History File Entries");
-        HistoryMenuLimit = cat.CreateEntry("HistoryMenuLimit", 5, "Max History Menu Entries");
+        HistoryMenuLimit = cat.CreateEntry("HistoryMenuLimit", 2, "Max History Menu Entries");
         InstanceHistory.Init((string)HistoryFileSetting.BoxedValue);
         ButtonAPI.OnInit += ButtonAPI_OnInit;
         Patches.Init(HarmonyInstance);
@@ -51,7 +52,7 @@ public class Main : MelonMod {
 
     private void ButtonAPI_OnInit() {
         instanceHistoryMenu = new InstanceHistoryMenu(ButtonAPI.MainPage);
-        foreach (System.Collections.Generic.KeyValuePair<string, InstanceHistoryEntry> entry in InstanceHistory.Instances.OrderByDescending(k => k.Value.LastJoined)) {
+        foreach (System.Collections.Generic.KeyValuePair<string, InstanceHistoryEntry> entry in InstanceHistory.Instances.OrderByDescending(k => k.Value.LastJoined).Take((int)HistoryMenuLimit.BoxedValue)) {
             _ = instanceHistoryMenu.Add(entry.Value.WorldId.ToString(), entry.Key, entry.Value.LastJoined ?? DateTime.Now);
         }
     }
